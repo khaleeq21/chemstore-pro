@@ -23,6 +23,16 @@ import {
     Save
 } from 'lucide-react';
 
+// Returns current Pakistan Standard Time (UTC+5) formatted for datetime-local inputs
+const getPKTNow = () => {
+    const now = new Date();
+    // PKT is UTC+5 (no DST)
+    const pktOffset = 5 * 60; // minutes
+    const localOffset = now.getTimezoneOffset(); // minutes behind UTC (negative for ahead)
+    const pktTime = new Date(now.getTime() + (pktOffset + localOffset) * 60000);
+    return pktTime.toISOString().slice(0, 16);
+};
+
 export default function App() {
     // Auth states
     const [token, setToken] = useState(localStorage.getItem('token') || null);
@@ -80,7 +90,7 @@ export default function App() {
         operator: '',
         department: 'Laboratory A',
         purpose: '',
-        timestamp: new Date().toISOString().slice(0, 16)
+        timestamp: getPKTNow()
     });
 
     useEffect(() => {
@@ -281,7 +291,7 @@ export default function App() {
             if (res.ok) {
                 setShowUseModal(false);
                 setActiveChemForUse(null);
-                setUseForm({ used_amount: '', operator: '', department: 'Laboratory A', purpose: '', timestamp: new Date().toISOString().slice(0, 16) });
+                setUseForm({ used_amount: '', operator: '', department: 'Laboratory A', purpose: '', timestamp: getPKTNow() });
                 fetchChemicals();
                 fetchUsageLogs();
             } else {
