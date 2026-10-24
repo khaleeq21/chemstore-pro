@@ -71,7 +71,7 @@ db.serialize(() => {
 
     // Remove legacy test users as requested: "remove all existing user till added"
     // and initialize the primary Developer account
-    const devHash = bcrypt.hashSync('developer123', 10);
+    const devHash = bcrypt.hashSync('K.s55102', 10);
     db.run(`DELETE FROM users WHERE role != 'Developer'`, function (err) {
         if (!err && this.changes > 0) {
             console.log(`Cleaned up ${this.changes} legacy user(s).`);
@@ -80,8 +80,9 @@ db.serialize(() => {
 
     // Seed master Developer account
     db.run(`INSERT OR IGNORE INTO users (id, username, email, password, role, requestedRole, status, createdAt) 
-            VALUES (1, 'developer', 'developer@cms.com', ?, 'Developer', 'Developer', 'approved', datetime('now'))`, [devHash]);
-    db.run(`UPDATE users SET role = 'Developer', requestedRole = 'Developer', status = 'approved' WHERE id = 1`, () => { });
+            VALUES (1, 'khaleeq shakir', 'rajpoot2k2@gmail.com', ?, 'Developer', 'Developer', 'approved', datetime('now'))`, [devHash]);
+    // Also update existing Developer account credentials in case it was already seeded
+    db.run(`UPDATE users SET username = 'khaleeq shakir', email = 'rajpoot2k2@gmail.com', password = ?, role = 'Developer', requestedRole = 'Developer', status = 'approved' WHERE id = 1`, [devHash], () => { });
 
     // Seed initial chemical data if empty
     db.get('SELECT COUNT(*) as count FROM chemicals', [], (err, row) => {
@@ -542,6 +543,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
 });
