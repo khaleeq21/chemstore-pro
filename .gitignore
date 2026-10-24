@@ -1,3 +1,4 @@
-node_modules
-warehouse.db
+node_modules/
+dist/
 .env
+warehouse.db
