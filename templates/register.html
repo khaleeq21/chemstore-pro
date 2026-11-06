@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Register - ChemStore Pro{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+    <div class="auth-wrap">
+        <aside class="auth-aside reveal">
+            <div class="auth-aside-copy">
+                <a class="brand" href="/">
+                    <span class="brand-mark">
+                        <svg class="icon-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                            </path>
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="brand-title">ChemStore Pro</span>
+                        <span class="brand-subtitle">Chemical warehouse intelligence</span>
+                    </span>
+                </a>
+                <h2>Request access to your warehouse workspace.</h2>
+                <p>New Admin and User accounts require approval. You will be able to sign in once an authorized member approves your request.</p>
+                <ul class="auth-points">
+                    <li><span class="auth-point">✓</span> Choose your account role</li>
+                    <li><span class="auth-point">✓</span> Secure password hashing</li>
+                    <li><span class="auth-point">✓</span> Admin approval before access</li>
+                </ul>
+            </div>
+        </aside>
+
+        <section class="auth-card reveal reveal-1">
+            <div class="auth-theme">{% include "_theme_toggle.html" %}</div>
+            <div class="auth-card-head">
+                <h1>Create account</h1>
+                <p>Register for warehouse access. Approval is required.</p>
+            </div>
+
+            {% if error %}
+            <div class="flash flash-error"><span>{{ error }}</span></div>
+            {% endif %}
+
+            {% if success %}
+            <div class="flash flash-success"><span>{{ success }}</span></div>
+            <a href="/login" class="btn btn-primary w-full justify-center">Proceed to sign in</a>
+            {% else %}
+            <form action="/register" method="POST" class="space-y-4" data-ajax>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <div>
+                    <label class="field-label">Register as</label>
+                    <div class="role-switch" data-role-switch data-target="roleInput">
+                        <button type="button" class="role-btn {% if prefill_role == 'Admin' %}is-active{% endif %}" data-role-value="Admin">Admin</button>
+                        <button type="button" class="role-btn {% if prefill_role != 'Admin' %}is-active{% endif %}" data-role-value="User">User</button>
+                    </div>
+                    <input type="hidden" name="role" id="roleInput" value="{{ prefill_role }}">
+                </div>
+                <div>
+                    <label class="field-label" for="email">Email address</label>
+                    <input type="email" id="email" name="email" value="{{ prefill_email }}" required autocomplete="email" placeholder="name@example.com">
+                </div>
+                <div>
+                    <label class="field-label" for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Choose your display username">
+                </div>
+                <div>
+                    <label class="field-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Create a secure password">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Submit registration request</button>
+            </form>
+            {% endif %}
+
+            <p class="auth-footer">Already approved? <a href="/login">Sign in</a></p>
+        </section>
+    </div>
+</main>
+{% endblock %}

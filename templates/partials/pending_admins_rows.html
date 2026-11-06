@@ -1,0 +1,21 @@
+{% for user in pending_admins %}
+<tr>
+    <td data-label="No." class="cell-muted font-mono">#{{ loop.index }}</td>
+    <td data-label="Email" class="cell-muted">{{ user.email }}</td>
+    <td data-label="Username" class="cell-strong">{{ user.username }}</td>
+    <td data-label="Actions" class="cell-actions">
+        <form action="/approve/{{ user.id }}" method="POST" class="inline" data-ajax>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+        </form>
+        <form action="/reject/{{ user.id }}" method="POST" class="inline" data-ajax>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+        </form>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="4" class="empty-state stack-empty">No pending administrator requests.</td>
+</tr>
+{% endfor %}

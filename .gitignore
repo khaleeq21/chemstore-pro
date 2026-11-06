@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+build/
+dist/
+.secret_key
+warehouse.db
+static/uploads/
+installer/
+portable/
+.env
+*.log
+ChemStorePro-pythonanywhere.zip
+pa_token.txt
+github_token.txt

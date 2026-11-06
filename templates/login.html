@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - ChemStore Pro{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+    <div class="auth-wrap">
+        <aside class="auth-aside reveal">
+            <div class="auth-aside-copy">
+                <a class="brand" href="/">
+                    <span class="brand-mark">
+                        <svg class="icon-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                            </path>
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="brand-title">ChemStore Pro</span>
+                        <span class="brand-subtitle">Chemical warehouse intelligence</span>
+                    </span>
+                </a>
+                <h2>Know every chemical, every drop, every movement.</h2>
+                <p>A calmer way to manage stock levels, usage logs, and team access across your laboratory warehouse.</p>
+                <ul class="auth-points">
+                    <li><span class="auth-point">✓</span> Live inventory and low-stock visibility</li>
+                    <li><span class="auth-point">✓</span> Full consumption audit trail</li>
+                    <li><span class="auth-point">✓</span> Role-based access and approvals</li>
+                </ul>
+            </div>
+        </aside>
+
+        <section class="auth-card reveal reveal-1">
+            <div class="auth-theme">{% include "_theme_toggle.html" %}</div>
+            <div class="auth-card-head">
+                <h1>Welcome back</h1>
+                <p>Sign in to continue to your warehouse dashboard.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="flash {% if category == 'success' %}flash-success{% else %}flash-error{% endif %}">
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endwith %}
+
+            {% if error %}
+            <div class="flash flash-error"><span>{{ error }}</span></div>
+            {% endif %}
+
+            <form action="/login" method="POST" class="space-y-4" data-ajax>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <div>
+                    <label class="field-label">Sign in as</label>
+                    <div class="role-switch" data-role-switch data-target="roleInput">
+                        <button type="button" class="role-btn is-active" data-role-value="Admin">Admin</button>
+                        <button type="button" class="role-btn" data-role-value="User">User</button>
+                    </div>
+                    <input type="hidden" name="role" id="roleInput" value="Admin">
+                </div>
+                <div>
+                    <label class="field-label" for="identifier">Email or username</label>
+                    <input type="text" id="identifier" name="identifier" required autocomplete="username" placeholder="Enter your email or username">
+                </div>
+                <div>
+                    <div class="flex items-center justify-between gap-3">
+                        <label class="field-label" for="password">Password</label>
+                        <a href="/forgot-password" class="text-xs font-semibold text-[color:var(--accent-text)] hover:underline">Forgot password?</a>
+                    </div>
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Sign in</button>
+            </form>
+
+            <p class="auth-footer">New to ChemStore? <a href="/register">Request an account</a></p>
+        </section>
+    </div>
+</main>
+{% endblock %}

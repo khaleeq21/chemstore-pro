@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP - ChemStore Pro{% endblock %}
+
+{% block body %}
+<main class="auth-shell">
+    <div class="auth-wrap">
+        <aside class="auth-aside reveal">
+            <div class="auth-aside-copy">
+                <a class="brand" href="/">
+                    <span class="brand-mark">
+                        <svg class="icon-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                            </path>
+                        </svg>
+                    </span>
+                    <span>
+                        <span class="brand-title">ChemStore Pro</span>
+                        <span class="brand-subtitle">Chemical warehouse intelligence</span>
+                    </span>
+                </a>
+                <h2>One last verification step.</h2>
+                <p>Enter the six-digit code from your email, then choose a new password. The code expires after five minutes.</p>
+                <ul class="auth-points">
+                    <li><span class="auth-point">✓</span> Check your email inbox</li>
+                    <li><span class="auth-point">✓</span> Or check the PythonAnywhere server log</li>
+                    <li><span class="auth-point">✓</span> Minimum six-character password</li>
+                </ul>
+            </div>
+        </aside>
+
+        <section class="auth-card reveal reveal-1">
+            <div class="auth-theme">{% include "_theme_toggle.html" %}</div>
+            <div class="auth-card-head">
+                <h1>Verify OTP</h1>
+                <p>Enter the code and set a new password.</p>
+            </div>
+
+            {% if error %}
+            <div class="flash flash-error"><span>{{ error }}</span></div>
+            {% endif %}
+
+            <form action="/verify-otp" method="POST" class="space-y-4">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <div>
+                    <label class="field-label" for="otp">Six-digit OTP</label>
+                    <input type="text" id="otp" name="otp" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="e.g. 482910" class="text-center font-mono tracking-[0.35em]">
+                </div>
+                <div>
+                    <label class="field-label" for="new_password">New password</label>
+                    <input type="password" id="new_password" name="new_password" required minlength="6" autocomplete="new-password" placeholder="Enter your new password">
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Reset password</button>
+            </form>
+
+            <p class="auth-footer"><a href="/login">&larr; Back to sign in</a></p>
+        </section>
+    </div>
+</main>
+{% endblock %}

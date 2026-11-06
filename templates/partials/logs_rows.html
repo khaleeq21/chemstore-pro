@@ -1,0 +1,13 @@
+{% for log in logs %}
+<tr>
+    <td data-label="Timestamp" class="cell-muted font-mono">{{ log.timestamp }}</td>
+    <td data-label="Chemical name" class="cell-strong">{{ log.chemical_name }}</td>
+    <td data-label="Amount used"><span class="text-accent font-semibold">{{ log.amount_used }} L</span></td>
+    <td data-label="Purpose" class="cell-muted">{{ log.purpose }}</td>
+    <td data-label="Used by" class="cell-muted">{{ log.username }}</td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="5" class="empty-state stack-empty">No usage logs yet. Consumption entries will appear here.</td>
+</tr>
+{% endfor %}

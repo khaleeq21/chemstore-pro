@@ -1,0 +1,41 @@
+{% set privileged = session['role'] in ['Developer', 'Admin'] %}
+{% for u in users %}
+<tr>
+    <td data-label="No." class="cell-muted font-mono">#{{ loop.index }}</td>
+    <td data-label="Avatar">
+        <span class="avatar avatar-sm">
+            {% if u.profile_pic and u.profile_pic != 'default.png' %}
+            <img src="{{ url_for('uploaded_file', filename=u.profile_pic) }}" alt="">
+            {% else %}
+            {{ u.username[:2].upper() }}
+            {% endif %}
+        </span>
+    </td>
+    <td data-label="Email" class="cell-muted">{{ u.email }}</td>
+    <td data-label="Username" class="cell-strong">{{ u.username }}</td>
+    <td data-label="Role"><span class="badge badge-role-{{ u.role|lower }}">{{ u.role }}</span></td>
+    <td data-label="Status">
+        {% if u.approved %}
+        <span class="badge badge-success">Active</span>
+        {% else %}
+        <span class="badge badge-warning">Pending</span>
+        {% endif %}
+    </td>
+    {% if privileged %}
+    <td data-label="Actions" class="cell-actions">
+        {% if u.role == 'Developer' %}
+        <span class="text-faint">Protected</span>
+        {% else %}
+        <form action="/remove-user/{{ u.id }}" method="POST" class="inline" data-ajax>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+        </form>
+        {% endif %}
+    </td>
+    {% endif %}
+</tr>
+{% else %}
+<tr>
+    <td colspan="{{ 7 if privileged else 6 }}" class="empty-state stack-empty">No members found.</td>
+</tr>
+{% endfor %}

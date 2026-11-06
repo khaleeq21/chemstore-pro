@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ChemStore Pro{% endblock %}
+
+{% block body %}
+<header class="app-header">
+    <a class="brand" href="/">
+        <span class="brand-mark">
+            <svg class="icon-20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                </path>
+            </svg>
+        </span>
+        <span class="min-w-0">
+            <span class="brand-title">ChemStore Pro</span>
+            <span class="brand-subtitle hidden sm:block">Chemical warehouse intelligence</span>
+        </span>
+    </a>
+    <div class="header-actions">
+        <span class="live-badge" id="liveStatus" title="Live dashboard updates every 15 seconds">
+            <span class="live-dot"></span>
+            <span data-live-label>Live</span>
+        </span>
+        {% include "_theme_toggle.html" %}
+        <a href="/profile" class="user-chip">
+            <span class="avatar avatar-xs" data-profile-avatar>
+                {% if current_user.profile_pic and current_user.profile_pic != 'default.png' %}
+                <img src="{{ url_for('uploaded_file', filename=current_user.profile_pic) }}" alt="">
+                {% else %}
+                {{ current_user.username[:2].upper() }}
+                {% endif %}
+            </span>
+            <span class="truncate"><span data-profile-username>{{ session['username'] }}</span> <strong class="user-role">({{ session['role'] }})</strong></span>
+        </a>
+        <a href="/logout" class="btn btn-danger btn-sm">
+            <svg class="icon-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"></path>
+            </svg>
+            <span class="hidden sm:inline">Logout</span>
+        </a>
+    </div>
+</header>
+
+<main class="page-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="flash {% if category == 'success' %}flash-success{% else %}flash-error{% endif %}">
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+    {% endwith %}
+
+    <section class="hero reveal">
+        <div class="hero-copy">
+            <p class="eyebrow">
+                <span class="live-dot"></span>
+                Warehouse command center
+            </p>
+            <h1 class="hero-title">Everything in stock, in one place.</h1>
+            <p class="hero-text">Track chemical inventory, consumption, members, and approvals with a live view of your warehouse. <span id="dashboardUpdated">Updated just now</span></p>
+        </div>
+        <div class="hero-actions">
+            {% if session['role'] in ['Developer', 'Admin'] %}
+            <button type="button" class="btn btn-primary" data-open-modal="addModal">
+                <svg class="icon-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14M5 12h14"></path>
+                </svg>
+                Add chemical
+            </button>
+            {% endif %}
+            <button type="button" class="btn btn-ghost" data-tab="logs">View usage logs</button>
+            <button type="button" class="btn btn-ghost" data-tab="users">{% if session['role'] in ['Developer', 'Admin'] %}Manage members{% else %}View administrators{% endif %}</button>
+        </div>
+    </section>
+
+    <section class="stat-grid">
+        <article class="stat-card reveal reveal-1" data-tone="indigo">
+            <div class="stat-top">
+                <span class="stat-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 3h6m-7 4h8m-9 0 1 13h8l1-13M10 11h4"></path>
+                    </svg>
+                </span>
+                <span class="stat-trend">Inventory</span>
+            </div>
+            <p class="stat-value" data-stat="chemicals">{{ stats.chemicals }}</p>
+            <p class="stat-label">Total chemicals</p>
+        </article>
+        <article class="stat-card reveal reveal-2" data-tone="amber">
+            <div class="stat-top">
+                <span class="stat-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M10.3 4.3 3.2 17a2 2 0 0 0 1.7 3h14.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"></path>
+                    </svg>
+                </span>
+                <span class="stat-trend">Threshold 50 L</span>
+            </div>
+            <p class="stat-value" data-stat="low_stock">{{ stats.low_stock }}</p>
+            <p class="stat-label">Low stock alerts</p>
+        </article>
+        <article class="stat-card reveal reveal-3" data-tone="cyan">
+            <div class="stat-top">
+                <span class="stat-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 19V5m0 14h16M8 15l3-4 3 2 4-6"></path>
+                    </svg>
+                </span>
+                <span class="stat-trend">Activity</span>
+            </div>
+            <p class="stat-value" data-stat="logs">{{ stats.logs }}</p>
+            <p class="stat-label">Usage logs</p>
+        </article>
+        <article class="stat-card reveal reveal-4" data-tone="emerald">
+            <div class="stat-top">
+                <span class="stat-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </span>
+                <span class="stat-trend">{% if session['role'] in ['Developer', 'Admin'] %}Team{% else %}Access{% endif %}</span>
+            </div>
+            <p class="stat-value" data-stat="members">{{ stats.members }}</p>
+            <p class="stat-label">{% if session['role'] in ['Developer', 'Admin'] %}Registered members{% else %}Administrators{% endif %}</p>
+        </article>
+    </section>
+
+    <nav class="tab-bar reveal reveal-5" aria-label="Dashboard sections">
+        <button type="button" class="tab-btn active" data-tab="inventory" aria-selected="true">Chemical inventory</button>
+        <button type="button" class="tab-btn" data-tab="logs" aria-selected="false">Usage logs</button>
+        <button type="button" class="tab-btn" data-tab="users" aria-selected="false">{% if session['role'] in ['Developer', 'Admin'] %}Authorized members{% else %}Administrators{% endif %}</button>
+        {% if session['role'] == 'Developer' %}
+        <button type="button" class="tab-btn" data-tab="dev-approvals" aria-selected="false">
+            Pending admins <span class="tab-count" data-tab-count="pending_admins">{{ pending_admins|length }}</span>
+        </button>
+        {% endif %}
+        {% if session['role'] in ['Developer', 'Admin'] %}
+        <button type="button" class="tab-btn" data-tab="admin-approvals" aria-selected="false">
+            Pending users <span class="tab-count" data-tab-count="pending_users">{{ pending_users|length }}</span>
+        </button>
+        {% endif %}
+    </nav>
+
+    <section class="tab-content reveal" id="section-inventory">
+        <div class="toolbar">
+            <form method="GET" action="/" class="search-wrap">
+                <span class="search-icon">
+                    <svg class="icon-16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.3-4.3M18 11a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"></path>
+                    </svg>
+                </span>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, code, or category..." class="search-input" data-search-input autocomplete="off">
+            </form>
+            <div class="toolbar-actions">
+                <a href="/" class="btn btn-ghost btn-sm">Clear</a>
+                {% if session['role'] in ['Developer', 'Admin'] %}
+                <button type="button" class="btn btn-primary btn-sm" data-open-modal="addModal">+ Add chemical</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="table-card">
+            <table class="data-table stack-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Chemical name</th>
+                        <th>Category</th>
+                        <th>Current stock</th>
+                        <th>Hazard level</th>
+                        <th>Storage zone</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    {% include "partials/inventory_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="tab-content hidden" id="section-logs">
+        <div class="table-card">
+            <div class="table-card-head">
+                <h2 class="panel-title">Usage and consumption logs</h2>
+                <span class="badge badge-muted">{{ logs|length }} entries</span>
+            </div>
+            <table class="data-table stack-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Chemical name</th>
+                        <th>Amount used</th>
+                        <th>Purpose</th>
+                        <th>Used by</th>
+                    </tr>
+                </thead>
+                <tbody id="logsBody">
+                    {% include "partials/logs_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="tab-content hidden" id="section-users">
+        <div class="table-card">
+            <div class="table-card-head">
+                <div>
+                    <h2 class="panel-title">{% if session['role'] in ['Developer', 'Admin'] %}All registered system members{% else %}System administrators{% endif %}</h2>
+                    <p class="panel-subtitle">{% if session['role'] in ['Developer', 'Admin'] %}Everyone with access to this warehouse{% else %}Contact an administrator for access requests{% endif %}</p>
+                </div>
+            </div>
+            <table class="data-table stack-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Avatar</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        {% if session['role'] in ['Developer', 'Admin'] %}
+                        <th class="text-right">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    {% include "partials/users_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {% if session['role'] == 'Developer' %}
+    <section class="tab-content hidden" id="section-dev-approvals">
+        <div class="table-card">
+            <div class="table-card-head">
+                <div>
+                    <h2 class="panel-title">Pending administrator requests</h2>
+                    <p class="panel-subtitle">Approve or reject new Admin accounts</p>
+                </div>
+                <span class="badge badge-muted" data-pending-count="pending_admins">{{ pending_admins|length }} waiting</span>
+            </div>
+            <table class="data-table stack-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingAdminsBody">
+                    {% include "partials/pending_admins_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if session['role'] in ['Developer', 'Admin'] %}
+    <section class="tab-content hidden" id="section-admin-approvals">
+        <div class="table-card">
+            <div class="table-card-head">
+                <div>
+                    <h2 class="panel-title">Pending user requests</h2>
+                    <p class="panel-subtitle">Approve or reject new User accounts</p>
+                </div>
+                <span class="badge badge-muted" data-pending-count="pending_users">{{ pending_users|length }} waiting</span>
+            </div>
+            <table class="data-table stack-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingUsersBody">
+                    {% include "partials/pending_users_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="panel usage-pulse reveal" id="usagePulse">
+        <div class="panel-header">
+            <div>
+                <h2 class="panel-title">Consumption pulse</h2>
+                <p class="panel-subtitle">Chemical usage over the last 7 days</p>
+            </div>
+            <p class="activity-summary"><span id="activityTotal">{{ activity|sum(attribute='count') }}</span> <span>entries</span></p>
+        </div>
+        <div class="panel-body">
+            <div class="activity-chart" id="activityChart" aria-label="Seven day usage chart">
+                {% set max_activity = (activity|max(attribute='count')).count or 1 %}
+                {% for day in activity %}
+                <div class="chart-col">
+                    <span class="chart-count">{{ day.count }}</span>
+                    <div class="chart-track">
+                        <div class="chart-bar" style="height: {{ ((day.count / max_activity) * 100)|round|int }}%"></div>
+                    </div>
+                    <span class="chart-label">{{ day.label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="modal" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addModalTitle" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h2 class="modal-title" id="addModalTitle">Add new chemical</h2>
+            <button type="button" class="modal-close" data-close-modal="addModal" aria-label="Close">&times;</button>
+        </div>
+        <form action="/add" method="POST" class="space-y-3" data-ajax>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div>
+                <label class="field-label" for="addCode">Chemical code</label>
+                <input type="text" id="addCode" name="code" required placeholder="e.g. CHEM-005">
+            </div>
+            <div>
+                <label class="field-label" for="addName">Chemical name</label>
+                <input type="text" id="addName" name="name" required placeholder="e.g. Ethanol Absolute">
+            </div>
+            <div>
+                <label class="field-label" for="addCategory">Category</label>
+                <input type="text" id="addCategory" name="category" required placeholder="e.g. Solvent">
+            </div>
+            <div>
+                <label class="field-label" for="addQuantity">Quantity (L)</label>
+                <input type="number" id="addQuantity" name="quantity" required min="0" placeholder="e.g. 200">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-soft" data-close-modal="addModal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save chemical</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="useModal" role="dialog" aria-modal="true" aria-labelledby="useModalTitle" aria-hidden="true">
+    <div class="modal-card">
+        <div class="modal-head">
+            <h2 class="modal-title" id="useModalTitle">Log chemical usage</h2>
+            <button type="button" class="modal-close" data-close-modal="useModal" aria-label="Close">&times;</button>
+        </div>
+        <form id="useForm" action="/use/0" method="POST" class="space-y-3" data-ajax>
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <p id="useItemName" class="text-accent text-sm font-semibold"></p>
+            <div>
+                <label class="field-label" for="amountUsed">Amount to use (L)</label>
+                <input type="number" id="amountUsed" name="amount_used" step="any" min="0.01" required placeholder="Enter amount consumed">
+            </div>
+            <div>
+                <label class="field-label" for="usePurpose">Purpose / experiment</label>
+                <input type="text" id="usePurpose" name="purpose" required placeholder="e.g. Lab cleanup / Solution prep">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-soft" data-close-modal="useModal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Confirm and log</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
